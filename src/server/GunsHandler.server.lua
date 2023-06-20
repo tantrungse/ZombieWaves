@@ -39,9 +39,9 @@ local function checkBulletRay(properties, result)
 	if not character:FindFirstChildWhichIsA("Humanoid") or Players:GetPlayerFromCharacter(character) then return end
 	
 	local offset = (result.Position - result.InstanceOriginPosition)
-	local ServerCFrameOffset = CFrame.new(result,Instance.Position) * CFrame.new(offset)
+	local serverCFrameOffset = CFrame.new(result.Instance.Position) * CFrame.new(offset)
 	
-	if (result.Position - ServerCFrameOffset.Position).Magnitude > MAX_DISCREPANCY_DIST then return end
+	if (result.Position - serverCFrameOffset.Position).Magnitude > MAX_DISCREPANCY_DIST then return end
 	
 	character.Humanoid:TakeDamage(properties.Damage * properties.BodyPartMultipliers[result.Instance.Name])
 end
@@ -50,9 +50,9 @@ local function reload(player, gun, properties)
 	local ammoInMag = gun:GetAttribute("AmmoInMag")
 	local ammoReserve = gun:GetAttribute("AmmoReserve")
 	if ammoInMag == properties.MaxMagAmmo then return end
-	if ammoReserve == 0 then return end
+	if ammoReserve <= 0 then return end
 
-	if DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name] < properties.ReloadDuration then return end
+	if (DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name]) < properties.ReloadDuration then return end
 	if not whoIsReloading[player.Name] then
 		whoIsReloading[player.Name] = {[gun.Name] = true}
 	else
@@ -68,7 +68,7 @@ local function reload(player, gun, properties)
 	whoIsReloading[player.Name][gun.Name] = false
 end
 
-local function shoot(player, gun : Tool, properties, result)
+local function shoot(player: Player, gun : Tool, properties, result)
 	if gun:GetAttribute("AmmoInMag") == 0 then return end
 	
 	if not timeSinceLastShot[player.Name] then
