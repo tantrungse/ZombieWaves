@@ -1,0 +1,12 @@
+{
+    "Lua.diagnostics.disable": [
+        "unused-local"
+    ],
+    "Lua.diagnostics.globals": [
+        "workspace",
+        "Enum",
+        "CFrame",
+        "DateTime",
+        "game"
+    ]
+}
