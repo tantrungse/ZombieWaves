@@ -32,6 +32,25 @@ local function createMuzzleFlash(parent, lightProperties)
 	return light
 end
 
+local function createBulletHole(properties, result)
+	if not result then return end
+	local bulletHole = ReplicatedStorage.Parts.BulletHole:Clone()
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = bulletHole
+	weld.Part1 = result.Instance 
+	weld.Parent = bulletHole
+
+	bulletHole.Size = properties.BulletHoleSize
+	bulletHole.CFrame = CFrame.new(result.Position, result.Position + result.Normal)
+	bulletHole.Parent = workspace.FilteringFolder.BulletHoles
+	bulletHole:FindFirstChildWhichIsA("Decal").Color3 = result.Instance.Color
+
+	bulletHole.ParticleEmitter.Color = ColorSequence.new(result.Instance.Color)
+	bulletHole.ParticleEmitter:Emit(properties.BulletHoleParticleAmount)
+
+	Debris:AddItem(bulletHole, 10)
+end
+
 local function checkBulletRay(properties, result)
 	if not result then return end
 	
@@ -102,8 +121,10 @@ local function shoot(player: Player, gun : Tool, properties, result)
 			sound.Ended:Connect(function() sound:Destroy() end)
 			
 			checkBulletRay(properties, result)
+			createBulletHole(properties, result)
 		else
 			checkBulletRay(properties, result)
+			createBulletHole(properties, result)
 		end
 	elseif gun:GetAttribute("GunType") == "Standard" then
 		if DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name] < 60/properties.FireRate then return end
@@ -122,6 +143,7 @@ local function shoot(player: Player, gun : Tool, properties, result)
 			sound.Ended:Connect(function() sound:Destroy() end)
 			
 			checkBulletRay(properties, result)
+			createBulletHole(properties, result)
 	end
 end
 
