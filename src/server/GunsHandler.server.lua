@@ -35,6 +35,7 @@ end
 local function createBulletHole(properties, result)
 	if not result then return end
 	local bulletHole = ReplicatedStorage.Parts.BulletHole:Clone()
+	bulletHole.Anchored = false
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = bulletHole
 	weld.Part1 = result.Instance 
@@ -91,23 +92,17 @@ local function shoot(player: Player, gun : Tool, properties, result)
 	if gun:GetAttribute("AmmoInMag") == 0 then return end
 	
 	if not timeSinceLastShot[player.Name] then
-		timeSinceLastShot[player.Name] = {[gun.Name] = 0, ["PelletCount"] = 1}
+		timeSinceLastShot[player.Name] = {[gun.Name] = 0}
 	end
 	if not timeSinceLastShot[player.Name][gun.Name] then
 		timeSinceLastShot[player.Name][gun.Name] = 0
 	end
 	
-	if gun:GetAttribute("GunType") == "Spread" then
-		if DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name] < 60/properties.FireRate then
-			return
-		else
-			timeSinceLastShot[player.Name]["PelletCount"] += 1
-		end
+	if gun:GetAttribute("GunType") == "Spread" then	
+		if DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name] < 60/properties.FireRate then return end
+		timeSinceLastShot[player.Name][gun.Name] = DateTime.now().UnixTimestampMillis
 		
-		if timeSinceLastShot[player.Name]["PelletCount"] >= properties.TotalPellets then
-			timeSinceLastShot[player.Name][gun.Name] = DateTime.now().UnixTimestampMillis
-			timeSinceLastShot[player.Name]["PelletCount"] = 0
-			
+		if not result or #result == 0 then
 			gun:SetAttribute("AmmoInMag", gun:GetAttribute("AmmoInMag") - 1)
 			local light = createMuzzleFlash(gun.Handle.Muzzle, properties.MuzzleFlashProperties)
 			task.spawn(function()
@@ -115,35 +110,51 @@ local function shoot(player: Player, gun : Tool, properties, result)
 				light:Destroy()
 			end)
 			gun.Handle.Muzzle.Flash:Emit(1)
-			
+
 			local sound = createSound(gun.Handle.Muzzle, properties.ShootSoundProperties)
 			sound:Play()
 			sound.Ended:Connect(function() sound:Destroy() end)
-			
-			checkBulletRay(properties, result)
-			createBulletHole(properties, result)
-		else
-			checkBulletRay(properties, result)
-			createBulletHole(properties, result)
+			return
 		end
+		
+		for i, pelletResult in ipairs(result) do
+			if i == 1 then
+				gun:SetAttribute("AmmoInMag", gun:GetAttribute("AmmoInMag") - 1)
+				local light = createMuzzleFlash(gun.Handle.Muzzle, properties.MuzzleFlashProperties)
+				task.spawn(function()
+					task.wait(0.15)
+					light:Destroy()
+				end)
+				gun.Handle.Muzzle.Flash:Emit(1)
+
+				local sound = createSound(gun.Handle.Muzzle, properties.ShootSoundProperties)
+				sound:Play()
+				sound.Ended:Connect(function() sound:Destroy() end)
+			end
+			checkBulletRay(properties, pelletResult)
+			createBulletHole(properties, pelletResult)
+		end
+		
+		if #result > properties.TotalPellets then return end
+		
 	elseif gun:GetAttribute("GunType") == "Standard" then
 		if DateTime.now().UnixTimestampMillis - timeSinceLastShot[player.Name][gun.Name] < 60/properties.FireRate then return end
 		timeSinceLastShot[player.Name][gun.Name] = DateTime.now().UnixTimestampMillis
-
+		
 		gun:SetAttribute("AmmoInMag", gun:GetAttribute("AmmoInMag") - 1)
-			local light = createMuzzleFlash(gun.Handle.Muzzle, properties.MuzzleFlashProperties)
-			task.spawn(function()
-				task.wait(0.15)
-				light:Destroy()
-			end)
-			gun.Handle.Muzzle.Flash:Emit(1)
+		local light = createMuzzleFlash(gun.Handle.Muzzle, properties.MuzzleFlashProperties)
+		task.spawn(function()
+			task.wait(0.15)
+			light:Destroy()
+		end)
+		gun.Handle.Muzzle.Flash:Emit(1)
 			
-			local sound = createSound(gun.Handle.Muzzle, properties.ShootSoundProperties)
-			sound:Play()
-			sound.Ended:Connect(function() sound:Destroy() end)
-			
-			checkBulletRay(properties, result)
-			createBulletHole(properties, result)
+		local sound = createSound(gun.Handle.Muzzle, properties.ShootSoundProperties)
+		sound:Play()
+		sound.Ended:Connect(function() sound:Destroy() end)
+		
+		checkBulletRay(properties, result)
+		createBulletHole(properties, result)
 	end
 end
 
@@ -158,11 +169,22 @@ gunEvent.OnServerEvent:Connect(function(player : Player, action, ...)
 		local args = {...}
 		if args[1] and args[2] and args[3] and args[4] then
 			args = {["Instance"] = args[1], ["Position"] = args[2], ["Normal"] = args[3], ["InstanceOriginPosition"] = args[4]}
+		elseif args[1] then
+			args = args[1]
 		else 
 			args = nil
 		end
 		shoot(player, gun, properties, args)
 	elseif action == "ValidateReload" then
 		reload(player, gun, properties)
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	if timeSinceLastShot[player.Name] then
+		timeSinceLastShot[player.Name] = nil
+	end
+	if whoIsReloading[player.Name] then
+		whoIsReloading[player.Name] = nil
 	end
 end)
