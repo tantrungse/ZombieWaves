@@ -1,6 +1,7 @@
 -- Variables --
 local properties = require(script.Parent.Properties)
 local myHumanoid = script.Parent.Humanoid
+local rng = Random.new()
 
 -- Debounces --
 local healing = false
@@ -32,4 +33,5 @@ myHumanoid.Died:Connect(function()
 	if not player:IsA("Player") then return end
 
 	player.leaderstats.Kills.Value += 1
+	player.leaderstats.Money.Value += rng:NextInteger(properties.MoneyDrop.Min, properties.MoneyDrop.Max)
 end)

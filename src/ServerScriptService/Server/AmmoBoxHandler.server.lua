@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Variables --
 local ammoBoxes = workspace.AmmoBoxes:GetChildren()
-local refillSound = ReplicatedStorage.Audio.CollectAmmo
+local refillSound = ReplicatedStorage.Shared.Audio.CollectAmmo
 
 -- Functions --
 local function onTriggered(player, ammoBox)

@@ -34,7 +34,7 @@ end
 
 local function createBulletHole(properties, result)
 	if not result then return end
-	local bulletHole = ReplicatedStorage.Parts.BulletHole:Clone()
+	local bulletHole = ReplicatedStorage.Shared.Parts.BulletHole:Clone()
 	bulletHole.Anchored = false
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = bulletHole
