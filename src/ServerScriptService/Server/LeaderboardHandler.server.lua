@@ -43,7 +43,8 @@ Players.PlayerAdded:Connect(function(player)
         warn("Error encountered when trying to grab player data!")
         print(result)
         erroredPlayer[player.Name] = true
-    else
+    end
+    if result then
         player.leaderstats.Kills.Value = result.Kills
         player.leaderstats.Deaths.Value = result.Deaths
     end

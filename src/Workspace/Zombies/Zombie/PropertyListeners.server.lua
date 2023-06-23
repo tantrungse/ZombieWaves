@@ -25,3 +25,11 @@ if properties.RegeneratesHealth then
 		until myHumanoid.Health >= (myHumanoid.MaxHealth * properties.HealthRegenLimit) or myHumanoid.Health < 1
 	end)
 end
+
+myHumanoid.Died:Connect(function()
+	local player = script.Parent.WhoLastDamaged.Value
+	if not player then return end
+	if not player:IsA("Player") then return end
+
+	player.leaderstats.Kills.Value += 1
+end)

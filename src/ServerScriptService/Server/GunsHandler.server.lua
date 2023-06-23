@@ -52,7 +52,7 @@ local function createBulletHole(properties, result)
 	Debris:AddItem(bulletHole, 10)
 end
 
-local function checkBulletRay(properties, result)
+local function checkBulletRay(properties, result, player)
 	if not result then return end
 	
 	local character = result.Instance.Parent
@@ -64,6 +64,9 @@ local function checkBulletRay(properties, result)
 	if (result.Position - serverCFrameOffset.Position).Magnitude > MAX_DISCREPANCY_DIST then return end
 	
 	character.Humanoid:TakeDamage(properties.Damage * properties.BodyPartMultipliers[result.Instance.Name])
+	if character.WhoLastDamaged then
+		character.WhoLastDamaged.Value = player
+	end
 end
 
 local function reload(player, gun, properties)
@@ -131,7 +134,7 @@ local function shoot(player: Player, gun : Tool, properties, result)
 				sound:Play()
 				sound.Ended:Connect(function() sound:Destroy() end)
 			end
-			checkBulletRay(properties, pelletResult)
+			checkBulletRay(properties, pelletResult, player)
 			createBulletHole(properties, pelletResult)
 		end
 		
@@ -153,7 +156,7 @@ local function shoot(player: Player, gun : Tool, properties, result)
 		sound:Play()
 		sound.Ended:Connect(function() sound:Destroy() end)
 		
-		checkBulletRay(properties, result)
+		checkBulletRay(properties, result, player)
 		createBulletHole(properties, result)
 	end
 end
