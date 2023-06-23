@@ -16,6 +16,9 @@ local soundIDs = {
 	["GrowlIDs"] = properties.GrowlSoundIDs
 }
 
+-- Animator
+local animator = myHumanoid.Animator
+
 for property,value in pairs(properties.HumanoidStats) do
 	myHumanoid[property] = value
 end
@@ -89,7 +92,7 @@ local function wander()
 			end
 			myHumanoid:MoveTo(waypoint.Position)
 			local timeOut = waitUntil(myHumanoid.MoveToFinished, 3)
-			if not timeOut then
+			if timeOut then
 				print("Zombie time out! Is it stuck?")
 				myHumanoid.Jump = true
 				break
@@ -110,6 +113,15 @@ local function attack(target)
 	if (myRootPart.Position - target.Position).Magnitude < properties.AttackRange then
 		if target.Parent == nil then return end
 		canAttack = false
+
+		local attackAnim = Instance.new("Animation")
+		attackAnim.AnimationId = properties.AttackAnimationIDs[rng:NextInteger(1, #properties.AttackAnimationIDs)]
+		local attackTrack = animator:LoadAnimation(attackAnim)
+		attackTrack:Play()
+		attackTrack.Ended:Connect(function()
+			attackTrack:Destroy()
+			attackAnim:Destroy()
+		end)
 		
 		if rng:NextInteger(1, 4) == 1 then
 			playRandomSound(soundIDs.AttackIDs, head)

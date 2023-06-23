@@ -38,15 +38,14 @@ local PreloadedAnims = {}
 local animTable = {}
 local animNames = { 
 	idle = 	{	
-		{ id = "http://www.roblox.com/asset/?id=507766666", weight = 1 },
-		{ id = "http://www.roblox.com/asset/?id=507766951", weight = 1 },
-		{ id = "http://www.roblox.com/asset/?id=507766388", weight = 9 }
+		{ id = "http://www.roblox.com/asset/?id=13833661517", weight = 1 },
+		{ id = "http://www.roblox.com/asset/?id=13833654814", weight = 9 }
 	},
 	walk = 	{ 	
-		{ id = "http://www.roblox.com/asset/?id=507777826", weight = 10 } 
+		{ id = "http://www.roblox.com/asset/?id=13833638476", weight = 10 } 
 	}, 
 	run = 	{
-		{ id = "http://www.roblox.com/asset/?id=507767714", weight = 10 } 
+		{ id = "http://www.roblox.com/asset/?id=13833650608", weight = 10 } 
 	}, 
 	swim = 	{
 		{ id = "http://www.roblox.com/asset/?id=507784897", weight = 10 } 

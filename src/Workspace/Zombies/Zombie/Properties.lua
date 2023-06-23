@@ -26,6 +26,9 @@ local self = {
 	]]
 	MoneyDrop = {Min = 5, Max = 10}, -- how much money (randomly) our zombie will give when killed
 
+	-- Attack animations
+	AttackAnimationIDs = {"rbxassetid://13833666917", "rbxassetid://13833682158"},
+
 	-- AGENT PARAMETERS REQUIRED FOR PATH FINDING SERVICE
 	AgentParams = {
 		AgentRadius = 2, -- the minimum width separation between two parts that our zombie can walk through, the default diameter of an R15 is 4 studs, so the radius is 2
