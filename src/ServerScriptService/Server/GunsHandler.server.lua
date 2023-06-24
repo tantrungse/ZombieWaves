@@ -64,7 +64,7 @@ local function checkBulletRay(properties, result, player)
 	if (result.Position - serverCFrameOffset.Position).Magnitude > MAX_DISCREPANCY_DIST then return end
 	
 	character.Humanoid:TakeDamage(properties.Damage * properties.BodyPartMultipliers[result.Instance.Name])
-	if character.WhoLastDamaged then
+	if character:FindFirstChild("WhoLastDamaged") then
 		character.WhoLastDamaged.Value = player
 	end
 end

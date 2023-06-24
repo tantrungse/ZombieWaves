@@ -187,7 +187,7 @@ local function newPathTo(target)
 			end
 			if checkVisbility(target) then
 				repeat
-					myHumanoid:MoveTo(target.Position + target.AssemblyLinearVelocity)
+					myHumanoid:MoveTo(target.Position + target.CFrame.LookVector * 2)
 					attack(target)
 					if rng:NextInteger(1, 150) == 1 then
 						playRandomSound(soundIDs.GrowlIDs, head)
