@@ -1,10 +1,10 @@
 -- Services --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = game:GetService("Players")
+local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 
 -- Variables --
-local player = Player.LocalPlayer
+local player = Players.LocalPlayer
 local gun = script.Parent
 local mouse = player:GetMouse()
 mouse.TargetFilter = workspace:WaitForChild("FilteringFolder")
@@ -59,6 +59,28 @@ local function createSound(parent, soundProperties)
 	return sound
 end
 
+local function createHitmarker(result)
+	if not result then return end
+	if result.Instance.Parent:FindFirstChildWhichIsA("Humanoid") 
+	and not Players:GetPlayerFromCharacter(result.Instance.Parent) then
+		local sound = createSound(game:GetService("SoundService"), properties.HitmarkerSoundProperties)
+		sound:Play()
+		sound.Ended:Connect(function()
+			sound:Destroy()
+		end)
+		gui.Hitmarker.Position = UDim2.new(0, mouse.X, 0, mouse.Y)
+		if result.Instance.Name == "Head" then
+			gui.Hitmarker.ImageColor3 = Color3.fromRGB(255, 119, 119)
+		end
+		task.spawn(function()
+			gui.Hitmarker.Visible = true
+			task.wait(0.08)
+			gui.Hitmarker.Visible = false
+			gui.Hitmarker.ImageColor3 = Color3.fromRGB(255, 255, 255)
+		end)
+	end
+end
+
 local function reload()
 	if gun:GetAttribute("AmmoInMag") == properties.MaxMagAmmo or gun:GetAttribute("AmmoReserve") == 0 then return end
 	if reloading then return end
@@ -91,6 +113,7 @@ local function shoot()
 		else 
 			gunEvent:FireServer("ValidateShot")
 		end
+		createHitmarker(result)
 	elseif gun:GetAttribute("GunType") == "Spread" then
 		local allPellets = {}
 		for i = 1, properties.TotalPellets do
@@ -107,6 +130,19 @@ local function shoot()
 			end
 		end
 		gunEvent:FireServer("ValidateShot", allPellets)
+		local bodyShots = {}
+		for _,result in ipairs(allPellets) do
+			if result.Instance.Name == "Head" then
+				createHitmarker(result)
+				bodyShots = {}
+				break
+			elseif result.Instance.Parent:FindFirstChildWhichIsA("Humanoid") then
+				table.insert(bodyShots, result)
+			end
+		end
+		if #bodyShots > 0 then
+			createHitmarker(bodyShots[1])
+		end
 	end
 	shootTrack:Play()
 end

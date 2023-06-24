@@ -159,6 +159,7 @@ local function newPathTo(target)
 	path:ComputeAsync(myRootPart.Position, target.Position)
 	local waypoints = path:GetWaypoints()
 	
+	--[[
 	local color = Color3.fromRGB(rng:NextInteger(0, 255), rng:NextInteger(0, 255), rng:NextInteger(0, 255))
 	for i,waypoint in ipairs(waypoints) do
 		local part = Instance.new("Part")
@@ -171,6 +172,7 @@ local function newPathTo(target)
 		part.CanCollide = false
 		part.Parent = workspace
 	end
+	--]]
 	
 	if path.Status == Enum.PathStatus.Success then
 		for _,waypoint in ipairs(waypoints) do

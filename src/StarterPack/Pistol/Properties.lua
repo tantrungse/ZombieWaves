@@ -51,6 +51,7 @@ local self = {
 		["RollOffMinDistance"] = 15, ["Volume"] = 0.6},
 	GunClickSoundProperties = {["SoundId"] = "rbxassetid://9116544314",  ["RollOffMode"] = Enum.RollOffMode.InverseTapered, ["RollOffMaxDistance"] = 25, 
 		["RollOffMinDistance"] = 15, ["Volume"] = 1.5},
+	HitmarkerSoundProperties = {["SoundId"] = "rbxassetid://160432334", ["Volume"] = 0.25}
 }
 
 
