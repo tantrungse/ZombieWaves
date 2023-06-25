@@ -14,7 +14,7 @@ local prices = {
     ["Rifle"] = {200, ServerStorage.Tools["Assault Rifle"]},
     ["Shotgun"] = {200, ServerStorage.Tools.Shotgun},
     ["ShotgunSlugs"] = {250},
-    ["Medkit"] = {30}
+    ["Medkit"] = {30, ServerStorage.Tools.Medkit}
 }
 local buyEvent = ReplicatedStorage.GUI.BuyItem
 
