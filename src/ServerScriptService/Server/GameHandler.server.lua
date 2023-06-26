@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Teams = game:GetService("Teams")
 local ServerStorage = game:GetService("ServerStorage") 
+local TweenService = game:GetService("TweenService")
 
 -- Variables --
 local gameEnum = {"START_INTERMISSION", "INTERMISSION", "WAVE_IN_PROGRESS", "GAME_OVER", "GAME_OVER_WIN","WAITING"}
@@ -44,6 +45,11 @@ local waveCash = {
     ["Wave10"] = 70,
 }
 
+-- Sounds
+local soundsFolder = workspace.Sounds
+local waveMusic = soundsFolder.WaveMusic:GetChildren()
+local currentPlayingMusic = nil
+
 -- Contants --
 local TOTAL_WAVES = 11
 
@@ -55,6 +61,27 @@ local function createHighlight(parent, properties)
     end
     highlight.Parent = parent
     return highlight
+end
+
+local function fadeSound(sound : Sound)
+    if not sound then return end
+
+    if sound.IsPlaying then
+        local fadeTween = TweenService:Create(sound, TweenInfo.new(3), {["Volume"] = 0})
+        sound:SetAttribute("OriginalVolume", sound.Volume)
+        fadeTween:Play()
+        fadeTween.Completed:Wait()
+        sound:Stop()
+    else
+        if sound.Volume ~= 0 then
+            sound:SetAttribute("OriginalVolume", sound.Volume)
+        end
+        sound.Volume = 0
+        sound:Play()
+        local fadeTween = TweenService:Create(sound, TweenInfo.new(3), {["Volume"] = sound:GetAttribute("OriginalVolume")})
+        fadeTween:Play()
+        fadeTween.Completed:Wait()
+    end
 end
 
 -- Event
@@ -96,6 +123,8 @@ workspace.AttributeChanged:Connect(function(name)
         -- START INTERMISSION
         gameEvent:FireAllClients("UpdateText", "WAITING FOR PLAYERS...")
         Teams.Alive.PlayerAdded:Wait()
+        currentPlayingMusic = soundsFolder.Intermission
+        task.spawn(fadeSound, currentPlayingMusic)
         for i = 30, 1, -1 do
             gameEvent:FireAllClients("UpdateText", "WAVES ARE STARTING IN "..i.." SECONDS!")
             task.wait(1)
@@ -105,6 +134,9 @@ workspace.AttributeChanged:Connect(function(name)
         end
     elseif workspace:GetAttribute(name) == gameEnum[2] then
         -- INTERMISSION
+        task.spawn(fadeSound, currentPlayingMusic)
+        currentPlayingMusic = soundsFolder.Intermission
+        task.spawn(fadeSound, currentPlayingMusic)
         for i = 60, 1, -1 do
             gameEvent:FireAllClients("UpdateText", "INTERMISSION: "..i.." SECONDS UNTIL NEXT WAVE!")
             task.wait(1)
@@ -114,6 +146,11 @@ workspace.AttributeChanged:Connect(function(name)
         end
     elseif workspace:GetAttribute(name) == gameEnum[3] then
         -- WAVE IN PROGRESS
+        gameEvent:FireAllClients("UpdateText", "WAVE STARTING...")
+        soundsFolder.HordeHowl:Play()
+        fadeSound(currentPlayingMusic)
+        currentPlayingMusic = waveMusic[rng:NextInteger(1, #waveMusic)]
+        task.spawn(fadeSound, currentPlayingMusic)
         currentWave += 1
         local zombiesToSpawn = {}
         for zombie,amount in pairs(zombiesInWave["Wave"..currentWave]) do
@@ -158,10 +195,14 @@ workspace.AttributeChanged:Connect(function(name)
 
     elseif workspace:GetAttribute(name) == gameEnum[4] then
         -- GAME OVER, PLAYERS LOST
+        task.spawn(fadeSound, currentPlayingMusic)
+        soundsFolder.Failure:Play()
         gameEvent:FireAllClients("UpdateText", "GAME OVER... ZOMBIES WIN...")
         task.wait(10)
         workspace:SetAttribute(name, gameEnum[6])
     elseif workspace:GetAttribute(name) == gameEnum[5] then
+        task.spawn(fadeSound, currentPlayingMusic)
+        soundsFolder.Victory:Play()
         -- GAME OVER! PLAYERS WIN
         gameEvent:FireAllClients("UpdateText", "GAME OVER! YOU WIN!!")
         task.wait(10)
@@ -174,6 +215,7 @@ workspace.AttributeChanged:Connect(function(name)
         currentWave = 0
         for _,player in ipairs(Teams.Alive:GetPlayers()) do
             player.Team = Teams.Dead
+            player.leaderstats.Money.Value = 0
             player:LoadCharacter()
         end
         task.wait(5)
