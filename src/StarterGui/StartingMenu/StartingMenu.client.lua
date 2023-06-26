@@ -2,6 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local Teams = game:GetService("Teams")
 
 -- Variables --
 local player = Players.LocalPlayer
@@ -10,9 +11,14 @@ local cameraEvent = ReplicatedStorage.GUI:WaitForChild("RotateCamera")
 local startingMenu = script.Parent
 
 local storeFrame = startingMenu:WaitForChild("StoreFrame")
+local spectatingFrame = startingMenu:WaitForChild("SpectateFrame")
 local blurImg = startingMenu:WaitForChild("ImageLabel")
 local guiFadeValues = {}
-local gameEnum = {"START_INTERMISSION", "INTERMISSION", "WAVE_IN_PROGRESS", "GAME_OVER", "WAITTING"}
+local gameEnum = {"START_INTERMISSION", "INTERMISSION", "WAVE_IN_PROGRESS", "GAME_OVER", "WAITING"}
+
+-- spectating
+local viewingPlayer = 1
+local camera = workspace.CurrentCamera
 
 -- buttons
 local playButton = blurImg:WaitForChild("Play")
@@ -22,12 +28,16 @@ local spectateButton = blurImg:WaitForChild("Spectate")
 -- debounces
 local playDebounce = false
 local storeDebounce = false
-local spectateButton = false
+local spectateDebounce = false
 
--- function 
+-- function
 local function fade(guiElement, goal) 
 	local tween = TweenService:Create(guiElement, TweenInfo.new(0.5), goal)
 	tween:Play()
+end
+
+local function getAlivePlayers()
+	return Teams.Alive:GetPlayers()
 end
 
 local function onHumanoidDeath()
@@ -68,4 +78,55 @@ playButton.MouseButton1Click:Connect(function()
 	end
 	
 	playDebounce = false
+end)
+
+-- spectating
+spectateButton.MouseButton1Click:Connect(function()
+	if spectateDebounce then return end
+	spectateDebounce = true
+
+	local alivePlayers = getAlivePlayers()
+	if #alivePlayers > 0 then
+		viewingPlayer = 1
+		spectatingFrame.Visible = true
+		blurImg.Visible = false
+		cameraEvent:Fire(false)
+		camera.CameraSubject = alivePlayers[viewingPlayer].Character.Humanoid
+		spectatingFrame.NameForPlayer.Text = alivePlayers[viewingPlayer].Name
+	else
+		local origText = spectateButton.Text
+		spectateButton.Text = "No players to spectate!"
+		task.wait(3)
+		spectateButton = origText
+	end
+
+	spectateDebounce = false
+end)
+
+spectatingFrame.Stop.MouseButton1Click:Connect(function()
+	spectatingFrame.Visible = false
+	blurImg.Visible = true
+	cameraEvent:Fire(true)
+end)
+
+spectatingFrame.Next.MouseButton1Click:Connect(function()
+	viewingPlayer += 1
+	local alivePlayers = getAlivePlayers()
+	if #alivePlayers == 0 then return end
+	if viewingPlayer > #alivePlayers then
+		viewingPlayer = 1
+	end
+	camera.CameraSubject = alivePlayers[viewingPlayer].Character.Humanoid
+	spectatingFrame.NameForPlayer.Text = alivePlayers[viewingPlayer].Name
+end)
+
+spectatingFrame.Previous.MouseButton1Click:Connect(function()
+	viewingPlayer -= 1
+	local alivePlayers = getAlivePlayers()
+	if #alivePlayers == 0 then return end
+	if viewingPlayer < 1 then
+		viewingPlayer = #alivePlayers
+	end
+	camera.CameraSubject = alivePlayers[viewingPlayer].Character.Humanoid
+	spectatingFrame.NameForPlayer.Text = alivePlayers[viewingPlayer].Name
 end)
