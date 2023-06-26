@@ -16,13 +16,15 @@ local character = workspace:WaitForChild(player.Name)
 local humanoid = character:WaitForChild("Humanoid") :: Humanoid
 local animator = humanoid:WaitForChild("Animator") :: Animator
 
-local animInstance = Instance.new("Animation")
-animInstance.AnimationId = properties.Animations.AnimEquip
-local equipTrack = animator:LoadAnimation(animInstance)
-animInstance.AnimationId = properties.Animations.AnimShoot
-local shootTrack = animator:LoadAnimation(animInstance)
-animInstance.AnimationId = properties.Animations.AnimReload
-local reloadTrack = animator:LoadAnimation(animInstance)
+local animInstanceEquip = Instance.new("Animation")
+local animInstanceShoot = Instance.new("Animation")
+local animInstanceReload = Instance.new("Animation")
+animInstanceEquip.AnimationId = properties.Animations.AnimEquip
+local equipTrack = animator:LoadAnimation(animInstanceEquip)
+animInstanceShoot.AnimationId = properties.Animations.AnimShoot
+local shootTrack = animator:LoadAnimation(animInstanceShoot)
+animInstanceReload.AnimationId = properties.Animations.AnimReload
+local reloadTrack = animator:LoadAnimation(animInstanceReload)
 
 local gui = gun:WaitForChild("GunGUI")
 

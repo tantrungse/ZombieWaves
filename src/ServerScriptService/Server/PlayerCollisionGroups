@@ -1,0 +1,28 @@
+-- Services --
+local Players = game:GetService("Players")
+
+-- Functions --
+local function onDescendantRemoved(descendant)
+    if descendant:IsA("BasePart") then
+        descendant.CollisionGroup = "Default"
+    end
+end
+
+local function onDescendantAdded(descendant)
+    if descendant:IsA("BasePart") then
+        descendant.CollisionGroup = "Players"
+    end
+end
+
+local function onCharacterAdded(character : Model)
+    for _,part in ipairs(character:GetDescendants()) do
+        onDescendantAdded(part)
+    end
+    character:DescendantAdded:Connect(onDescendantAdded)
+    character:DescendantRemoving:Connect(onDescendantRemoved)
+end
+
+-- Events --
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(onCharacterAdded)
+end)
