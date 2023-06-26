@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local Teams = game:GetService("Teams")
 local ServerStorage = game:GetService("ServerStorage") 
 local TweenService = game:GetService("TweenService")
+local BadgeService = game:GetService("BadgeService")
 
 -- Variables --
 local gameEnum = {"START_INTERMISSION", "INTERMISSION", "WAVE_IN_PROGRESS", "GAME_OVER", "GAME_OVER_WIN","WAITING"}
@@ -52,6 +53,7 @@ local currentPlayingMusic = nil
 
 -- Contants --
 local TOTAL_WAVES = 11
+local VICTORY_BADGE = 2147739702
 
 -- Functions --
 local function createHighlight(parent, properties)
@@ -81,6 +83,15 @@ local function fadeSound(sound : Sound)
         local fadeTween = TweenService:Create(sound, TweenInfo.new(3), {["Volume"] = sound:GetAttribute("OriginalVolume")})
         fadeTween:Play()
         fadeTween.Completed:Wait()
+    end
+end
+
+local function awardBadge(playerId, badgeId)
+    local success, result = pcall(function()
+        return BadgeService:AwardBadge(playerId, badgeId)
+    end)
+    if not success then
+        print("Error awarding badge! \n"..result)
     end
 end
 
@@ -205,6 +216,9 @@ workspace.AttributeChanged:Connect(function(name)
         soundsFolder.Victory:Play()
         -- GAME OVER! PLAYERS WIN
         gameEvent:FireAllClients("UpdateText", "GAME OVER! YOU WIN!!")
+        for _,player in ipairs(Teams.Alive:GetPlayers()) do
+            awardBadge(player.UserId, VICTORY_BADGE)
+        end
         task.wait(10)
         workspace:SetAttribute(name, gameEnum[6])
     elseif workspace:GetAttribute(name) == gameEnum[6] then
