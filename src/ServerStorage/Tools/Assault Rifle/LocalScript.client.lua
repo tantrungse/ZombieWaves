@@ -225,3 +225,12 @@ if gun:GetAttribute("GunType") == "Spread" then
 		sound:Destroy()
 	end)
 end
+
+-- for updating properties when told by server
+gunEvent.OnClientEvent:Connect(function(action, passGun, property, value)
+	if passGun ~= gun then return end
+
+	if action == "UpdateProperty" then
+		properties[property] = value
+	end
+end)

@@ -12,9 +12,12 @@ local startingMenu = script.Parent
 
 local storeFrame = startingMenu:WaitForChild("StoreFrame")
 local spectatingFrame = startingMenu:WaitForChild("SpectateFrame")
+local shopFrame = startingMenu:WaitForChild("StoreFrame")
 local blurImg = startingMenu:WaitForChild("ImageLabel")
 local guiFadeValues = {}
 local gameEnum = {"START_INTERMISSION", "INTERMISSION", "WAVE_IN_PROGRESS", "GAME_OVER", "WAITING"}
+
+local buyEvent = ReplicatedStorage.GUI:WaitForChild("BuyGamepass")
 
 -- spectating
 local viewingPlayer = 1
@@ -22,12 +25,11 @@ local camera = workspace.CurrentCamera
 
 -- buttons
 local playButton = blurImg:WaitForChild("Play")
-local storeButton = blurImg:WaitForChild("Store")
+local shopButton = blurImg:WaitForChild("Store")
 local spectateButton = blurImg:WaitForChild("Spectate")
 
 -- debounces
 local playDebounce = false
-local storeDebounce = false
 local spectateDebounce = false
 
 -- function
@@ -129,4 +131,21 @@ spectatingFrame.Previous.MouseButton1Click:Connect(function()
 	end
 	camera.CameraSubject = alivePlayers[viewingPlayer].Character.Humanoid
 	spectatingFrame.NameForPlayer.Text = alivePlayers[viewingPlayer].Name
+end)
+
+-- store system
+shopButton.MouseButton1Click:Connect(function()
+	shopFrame.Visible = true
+end)
+
+shopFrame.CloseButton.MouseButton1Click:Connect(function()
+	shopFrame.Visible = false
+end)
+
+shopFrame:WaitForChild("FasterReload").Buy.MouseButton1Click:Connect(function()
+	buyEvent:FireServer("FasterReload")
+end)
+
+shopFrame:WaitForChild("GoldenKnife").Buy.MouseButton1Click:Connect(function()
+	buyEvent:FireServer("GoldenKnife")
 end)
