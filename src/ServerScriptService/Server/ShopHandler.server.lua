@@ -14,7 +14,8 @@ local prices = {
     ["Rifle"] = {200, ServerStorage.Tools["Assault Rifle"]},
     ["Shotgun"] = {200, ServerStorage.Tools.Shotgun},
     ["ShotgunSlugs"] = {250},
-    ["Medkit"] = {30, ServerStorage.Tools.Medkit}
+    ["Medkit"] = {30, ServerStorage.Tools.Medkit},
+    ["Grenade"] = {30, ServerStorage.Tools.Grenade}
 }
 local buyEvent = ReplicatedStorage.GUI.BuyItem
 
@@ -43,6 +44,22 @@ buyEvent.OnServerEvent:Connect(function(player, nameOfItem)
     or player.Character:FindFirstChild(prices[nameOfItem][2].Name))
     and prices[nameOfItem][2].Name ~= "Medkit") then
         return
+    end
+    if nameOfItem == "Grenade" then
+        local grenadeTool = nil
+        for _,tool in ipairs(player.Backpack:GetChildren()) do
+            if string.find(tool.Name, "Grenade") then
+                grenadeTool = tool
+            end
+        end
+        if not grenadeTool then
+            grenadeTool = player.Character:FindFirstChildWhichIsA("Tool")
+        end
+        if grenadeTool and grenadeTool:GetAttribute("GrenadesLeft") then
+            if grenadeTool:GetAttribute("GrenadesLeft") == grenadeTool:GetAttribute("MaxGrenades") then return end
+            player.leaderstats.Money.Value = afterBalance
+            return
+        end
     end
 
     player.leaderstats.Money.Value = afterBalance
