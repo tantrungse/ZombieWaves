@@ -40,9 +40,9 @@ buyEvent.OnServerEvent:Connect(function(player, nameOfItem)
 
     local afterBalance = player.leaderstats.Money.Value - prices[nameOfItem][1]
     if afterBalance < 0 then return end
-    if ((player.Backpack:FindFirstChild(prices[nameOfItem][2].Name) 
+    if (player.Backpack:FindFirstChild(prices[nameOfItem][2].Name) 
     or player.Character:FindFirstChild(prices[nameOfItem][2].Name))
-    and prices[nameOfItem][2].Name ~= "Medkit") then
+    and prices[nameOfItem][2].Name ~= "Medkit" then
         return
     end
     if nameOfItem == "Grenade" then
@@ -57,6 +57,7 @@ buyEvent.OnServerEvent:Connect(function(player, nameOfItem)
         end
         if grenadeTool and grenadeTool:GetAttribute("GrenadesLeft") then
             if grenadeTool:GetAttribute("GrenadesLeft") == grenadeTool:GetAttribute("MaxGrenades") then return end
+            grenadeTool:SetAttribute("GrenadesLeft", grenadeTool:GetAttribute("GrenadesLeft") + 1)
             player.leaderstats.Money.Value = afterBalance
             return
         end
